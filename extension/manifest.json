@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "PMS Address Lookup Extension",
+  "version": "1.0",
+  "description": "Adds address lookup functionality to specific pages",
+  "permissions": [
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://hostex.io/app/login/forgot"],
+      "js": ["content.js"]
+    }
+  ],
+  "host_permissions": [
+    "https://zipcloud.ibsnet.co.jp/*"
+  ]
+} 
