@@ -104,4 +104,94 @@ window.extensionObserver = new MutationObserver((mutations) => {
 window.extensionObserver.observe(document.body, {
     childList: true,
     subtree: true
-}); 
+});
+
+// Function to check if drawer exists and find stay code
+function checkDrawerAndInitialize() {
+    const drawer = document.querySelector('div[class="ant-drawer-content-wrapper"]');
+    if (!drawer) {
+        return false;
+    }
+    findStayCodeAndAddButton();
+    return true;
+}
+
+// Function to find stay code and add button
+function findStayCodeAndAddButton() {
+    // Get all v4-layout-field divs
+    const divList = document.querySelectorAll('div[class="v4-layout-field"]');
+    let foundElement = null;
+    let stayCode = "";
+
+    // Find the div containing stay code
+    for (const itemDiv of divList) {
+        const labelSpan = itemDiv.querySelector('div[class="v4-layout-field-label"] span');
+        if (labelSpan && labelSpan.innerHTML.includes('入住号')) {
+            foundElement = itemDiv;
+            break;
+        }
+    }
+
+    // If found element exists, get stay code and add button
+    if (foundElement) {
+        const ellipsisDiv = foundElement.querySelector('div[class="ellipsis"]');
+        if (ellipsisDiv) {
+            stayCode = ellipsisDiv.innerHTML.trim();
+            addSwitchBotButton(foundElement, stayCode);
+        }
+    }
+}
+
+// Function to add SwitchBot button
+function addSwitchBotButton(targetElement, stayCode) {
+    // Check if button already exists
+    if (document.getElementById('switchBotbtn')) {
+        return;
+    }
+
+    // Create button container
+    const buttonDiv = document.createElement('div');
+    buttonDiv.className = 'button ng-star-inserted';
+    buttonDiv.innerHTML = `
+        <button id="switchBotbtn" nztype="primary" nzsize="small" class="ant-btn ant-btn-primary ant-btn-sm ng-star-inserted">
+            <span class="ng-star-inserted"> SwitchBot </span>
+        </button>
+    `;
+
+    // Add click event listener
+    buttonDiv.querySelector('#switchBotbtn').addEventListener('click', () => {
+        handleSwitchBotClick(stayCode);
+    });
+
+    // Insert after target element
+    targetElement.parentNode.insertBefore(buttonDiv, targetElement.nextSibling);
+}
+
+// Function to fetch address and show alert
+async function handleSwitchBotClick(stayCode) {
+    try {
+        const response = await fetch('https://zipcloud.ibsnet.co.jp/api/search?zipcode=1230872');
+        const data = await response.json();
+        
+        if (data.status === 200 && data.results && data.results.length > 0) {
+            const result = data.results[0];
+            const address = `${result.address1}${result.address2}${result.address3}`;
+            alert(`${address}:${stayCode}`);
+        } else {
+            alert('住所の取得に失敗しました');
+        }
+    } catch (error) {
+        console.error('Error fetching address:', error);
+        alert('エラーが発生しました');
+    }
+}
+
+// Start periodic check for drawer
+const checkInterval = setInterval(() => {
+    if (checkDrawerAndInitialize()) {
+        clearInterval(checkInterval);
+    }
+}, 1000);
+
+// Initial check
+checkDrawerAndInitialize(); 

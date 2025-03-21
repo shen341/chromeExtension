@@ -1,12 +1,14 @@
-# Address Lookup Chrome Extension
+# SwitchBot Integration Chrome Extension
 
-This Chrome extension adds address lookup functionality to the specified webpage. When installed, it adds a test button that can fetch address information based on a zipcode input.
+This Chrome extension adds SwitchBot integration functionality to the calendar page. It automatically detects the stay code and adds a SwitchBot button for quick address lookup.
 
 ## Features
 
-- Automatically adds a "テスト" button on the specified page
-- Fetches address information from zipcode using the zipcloud API
-- Displays the fetched address on the page
+- Automatically detects when the drawer content is loaded
+- Finds and extracts the stay code from the page
+- Adds a SwitchBot button next to the stay code
+- Fetches address information when the SwitchBot button is clicked
+- Displays the address along with the stay code
 
 ## Installation
 
@@ -17,10 +19,13 @@ This Chrome extension adds address lookup functionality to the specified webpage
 
 ## Usage
 
-1. Navigate to `https://hostex.io/app/login/forgot`
-2. The extension will automatically add a "テスト" button above the existing submit button
-3. Enter a Japanese zipcode in the account input field
-4. Click the "テスト" button to fetch and display the corresponding address
+1. Navigate to `https://hostex.io/app/calendar`
+2. When the drawer content loads, the extension will automatically:
+   - Find the stay code in the page
+   - Add a SwitchBot button next to it
+3. Click the SwitchBot button to:
+   - Fetch address information
+   - Display an alert with the address and stay code
 
 ## Implementation Details
 
@@ -29,22 +34,40 @@ The extension consists of the following files:
 ### manifest.json
 - Defines the extension configuration
 - Specifies permissions and content scripts
-- Sets up URL matching patterns
+- Sets up URL matching for the calendar page
+- Configures host permissions for the zipcloud API
 
 ### content.js
-- Handles DOM manipulation and event listening
-- Implements the address lookup functionality
-- Uses MutationObserver to handle dynamic content loading
-
 Key functions:
-- `addElements()`: Adds the test button and address label to the page
-- `fetchAddress()`: Retrieves address data from the zipcloud API
-- `handleTestButtonClick()`: Manages the click event on the test button
-- `initialize()`: Sets up the extension functionality
+- `checkDrawerAndInitialize()`: Checks for drawer content and initializes the extension
+- `findStayCodeAndAddButton()`: Locates the stay code and adds the SwitchBot button
+- `addSwitchBotButton()`: Creates and inserts the SwitchBot button
+- `handleSwitchBotClick()`: Handles button clicks and fetches address data
 
-## API Integration
+## Technical Implementation
 
-The extension uses the zipcloud API (`https://zipcloud.ibsnet.co.jp/api/search`) to fetch address information. The API returns data in the following format:
+1. **Drawer Detection**
+   - Uses `setInterval` to check for drawer content every second
+   - Stops checking once the drawer is found
+
+2. **Stay Code Detection**
+   - Searches for elements with class "v4-layout-field"
+   - Identifies the correct element by checking for "滞在コード" text
+   - Extracts the stay code from the ellipsis div
+
+3. **Button Integration**
+   - Creates a new button with the same styling as existing buttons
+   - Inserts the button after the stay code element
+   - Adds click event listener for address lookup
+
+4. **API Integration**
+   - Fetches address data from zipcloud API
+   - Formats and displays the address with the stay code
+   - Includes error handling for API failures
+
+## API Response Format
+
+The extension expects the following response format from the zipcloud API:
 
 ```json
 {
@@ -67,6 +90,7 @@ The extension uses the zipcloud API (`https://zipcloud.ibsnet.co.jp/api/search`)
 
 ## Notes
 
-- The extension uses Manifest V3
-- It includes error handling for API requests
-- Implements a MutationObserver to handle dynamically loaded content
+- The extension uses MutationObserver to handle dynamic content
+- Includes error handling for API requests and DOM operations
+- Prevents duplicate button creation
+- Uses modern JavaScript features and async/await for API calls
