@@ -137,15 +137,16 @@ function findStayCodeAndAddButton() {
         const ellipsisDiv = foundElement.querySelector('div[class="ellipsis"]');
         if (ellipsisDiv) {
             stayCode = ellipsisDiv.innerHTML.trim();
-            addSwitchBotButton(foundElement, stayCode);
+            console.log("stayCode======================",stayCode);
+            addSwitchBotButton(stayCode);
         }
     }
 }
 
 // Function to add SwitchBot button
-function addSwitchBotButton(targetElement, stayCode) {
+function addSwitchBotButton(stayCode) {
     // Check if button already exists
-    if (document.getElementById('switchBotbtn')) {
+    if (document.getElementById('oncetimePasswordGetbtn')) {
         return;
     }
 
@@ -153,36 +154,113 @@ function addSwitchBotButton(targetElement, stayCode) {
     const buttonDiv = document.createElement('div');
     buttonDiv.className = 'button ng-star-inserted';
     buttonDiv.innerHTML = `
-        <button id="switchBotbtn" nztype="primary" nzsize="small" class="ant-btn ant-btn-primary ant-btn-sm ng-star-inserted">
-            <span class="ng-star-inserted"> SwitchBot </span>
+        <button id="oncetimePasswordGetbtn" nztype="primary" nzsize="small" class="ant-btn ant-btn-primary ant-btn-sm ng-star-inserted">
+            <span class="ng-star-inserted">智能锁密码取得</span>
         </button>
     `;
 
     // Add click event listener
-    buttonDiv.querySelector('#switchBotbtn').addEventListener('click', () => {
+    buttonDiv.querySelector('#oncetimePasswordGetbtn').addEventListener('click', () => {
         handleSwitchBotClick(stayCode);
     });
 
-    // Insert after target element
-    targetElement.parentNode.insertBefore(buttonDiv, targetElement.nextSibling);
+    // Get all v4-layout-field divs
+    const divList = document.querySelectorAll('div[class="v4-layout-field"]');
+    let foundInsertElement = null;
+    console.log("divList======================",divList);
+    // Find the div containing stay code
+    for (const itemDiv of divList) {
+        const labelSpan = itemDiv.querySelector('div[class="v4-layout-field-label"] span');
+        console.log("labelSpan======================",labelSpan);
+        if (labelSpan && labelSpan.innerHTML.includes('退房时间')) {
+            foundInsertElement = itemDiv;
+            break;
+        }
+    }
+
+    // Insert button after the target element
+    if (foundInsertElement) {
+        console.log("foundInsertElement======================",foundInsertElement);
+        foundInsertElement.parentNode.insertBefore(buttonDiv, foundInsertElement.nextSibling);
+    }
 }
 
 // Function to fetch address and show alert
 async function handleSwitchBotClick(stayCode) {
     try {
-        const response = await fetch('https://zipcloud.ibsnet.co.jp/api/search?zipcode=1230872');
-        const data = await response.json();
+        console.log("stayCode======================",stayCode);
+        const response = await fetch('https://67e8a51e20e3af747c41ac3d.mockapi.io/stays/1');
+        const responseText = await response.text();
+        console.log("Raw API Response:", responseText);
+
+        let data;
+        try {
+            // 尝试清理和修复 JSON 字符串
+            const cleanedJson = responseText
+                .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3') // 给属性名添加双引号
+                .replace(/'/g, '"'); // 将单引号替换为双引号
+            
+            data = JSON.parse(cleanedJson);
+            console.log("Parsed data:", data);
+        } catch (parseError) {
+            console.error("JSON Parse Error:", parseError);
+            console.error("Response Text:", responseText);
+            alert('服务器返回数据格式错误');
+            return;
+        }
         
-        if (data.status === 200 && data.results && data.results.length > 0) {
-            const result = data.results[0];
-            const address = `${result.address1}${result.address2}${result.address3}`;
-            alert(`${address}:${stayCode}`);
+        if (data.status === "NG") {
+            alert('密码取得错误！');
+            return;
+        }
+
+        if (data.status && data.password) {
+            const password = data.password;
+            
+            // Check if password element already exists
+            const existingPasswordElement = document.getElementById('handleSwitchBotClickPassword');
+            if (existingPasswordElement) {
+                // Update existing password span
+                const passwordSpan = existingPasswordElement.querySelector('#handleSwitchBotClickPasswordSpan');
+                if (passwordSpan) {
+                    passwordSpan.innerHTML = password;
+                }
+            } else {
+                // Create new password element
+                const passwordElement = document.createElement('div');
+                passwordElement.className = 'v4-layout-field ng-star-inserted';
+                passwordElement.id = 'handleSwitchBotClickPassword';
+                passwordElement.innerHTML = `
+                    <div class="v4-layout-field-label">
+                        <span>门锁密码</span>
+                    </div>
+                    <div class="v4-layout-field-control">
+                        <div class="v4-layout-field-row">
+                            <div class="v4-layout-field-control">
+                                <div class="v4-layout-field-row">
+                                    <span id="handleSwitchBotClickPasswordSpan">${password}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const targetButton = document.getElementById('oncetimePasswordGetbtn');
+                if (targetButton) {
+                    console.log("targetButton======================",targetButton);
+                    // Get the button container (parent div)
+                    const buttonContainer = targetButton.parentNode;
+                    // Insert after the button container
+                    buttonContainer.parentNode.insertBefore(passwordElement, buttonContainer.nextSibling);
+                    console.log("passwordElement======================",passwordElement);
+                }
+            }
         } else {
-            alert('住所の取得に失敗しました');
+            alert('密码取得失败');
         }
     } catch (error) {
-        console.error('Error fetching address:', error);
-        alert('エラーが発生しました');
+        console.error('Error fetching password:', error);
+        alert('发生错误');
     }
 }
 
