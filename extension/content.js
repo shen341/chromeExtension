@@ -65,14 +65,14 @@ function initialize() {
     }
 
     // Add elements to the page
-    addElements();
+    // addElements();
 
     // Add click event listener to test button
-    const testButton = document.getElementById('test');
-    if (testButton && !testButton.hasAttribute('data-listener-attached')) {
-        testButton.addEventListener('click', handleTestButtonClick);
-        testButton.setAttribute('data-listener-attached', 'true');
-    }
+    // const testButton = document.getElementById('test');
+    // if (testButton && !testButton.hasAttribute('data-listener-attached')) {
+    //     testButton.addEventListener('click', handleTestButtonClick);
+    //     testButton.setAttribute('data-listener-attached', 'true');
+    // }
 
     // Reconnect observer
     if (window.extensionObserver) {
@@ -264,12 +264,38 @@ async function handleSwitchBotClick(stayCode) {
     }
 }
 
-// Start periodic check for drawer
-const checkInterval = setInterval(() => {
-    if (checkDrawerAndInitialize()) {
-        clearInterval(checkInterval);
-    }
-}, 1000);
+// 添加点击事件监听器
+document.addEventListener('click', function(event) {
+    // 检查事件路径中是否包含目标元素
+    const path = event.composedPath();
+    const isTargetClicked = path.some(element => 
+        element instanceof HTMLElement && 
+        element.matches('div.host-reservation-bar')
+    );
+    
+    console.log("path======================",path);
+    console.log("isTargetClicked======================",isTargetClicked);
 
-// Initial check
-checkDrawerAndInitialize(); 
+    if (isTargetClicked) {
+
+        // check id="handleSwitchBotClickPasswordSpan" exists, if exists, clear it
+        const passwordSpan = document.getElementById('handleSwitchBotClickPasswordSpan');
+        if (passwordSpan) {
+            passwordSpan.innerHTML = '';
+            console.log("passwordSpan======================",passwordSpan);
+        }
+
+        console.log('host-reservation-bar was clicked');
+        let checkCount = 0;
+        const maxChecks = 5;
+        
+        // 创建新的检查间隔
+        const newCheckInterval = setInterval(() => {
+            checkCount++;
+            if (checkDrawerAndInitialize() || checkCount >= maxChecks) {
+                clearInterval(newCheckInterval);
+                console.log(`Check completed after ${checkCount} attempts`);
+            }
+        }, 1000);
+    }
+}, true); 
