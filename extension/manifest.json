@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "SwitchBot Integration Extension",
+  "name": "Iot Integration Extension for lodgegeek",
   "version": "1.0",
-  "description": "Adds SwitchBot integration functionality to calendar page",
+  "description": "Adds Iot integration functionality to calendar page",
   "permissions": [
     "activeTab"
   ],
