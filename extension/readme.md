@@ -1,13 +1,13 @@
-# SwitchBot Integration Chrome Extension
+# Iot Integration Chrome Extension
 
-This Chrome extension adds SwitchBot integration functionality to the calendar page. It automatically detects the stay code and adds a SwitchBot button for quick address lookup.
+This Chrome extension adds Iot integration functionality to the calendar page. It automatically detects the stay code and adds a Iot button for quick address lookup.
 
 ## Features
 
 - Automatically detects when the drawer content is loaded
 - Finds and extracts the stay code from the page
-- Adds a SwitchBot button for retrieving one-time passwords
-- Fetches password information when the SwitchBot button is clicked
+- Adds a Iot button for retrieving one-time passwords
+- Fetches password information when the Iot button is clicked
 - Displays the password along with the stay code
 - Includes a test button and address label for testing purposes
 - Provides address lookup functionality using zipcodes
@@ -24,8 +24,8 @@ This Chrome extension adds SwitchBot integration functionality to the calendar p
 1. Navigate to `https://hostex.io/app/calendar`
 2. When the drawer content loads, the extension will automatically:
    - Find the stay code in the page
-   - Add a SwitchBot button next to it
-3. Click the SwitchBot button to:
+   - Add a Iot button next to it
+3. Click the Iot button to:
    - Fetch password information
    - Display the password with the stay code
 
@@ -42,9 +42,9 @@ The extension consists of the following files:
 ### content.js
 Key functions:
 - `checkDrawerAndInitialize()`: Checks for drawer content and initializes the extension
-- `findStayCodeAndAddButton()`: Locates the stay code and adds the SwitchBot button
-- `addSwitchBotButton()`: Creates and inserts the SwitchBot button
-- `handleSwitchBotClick()`: Handles button clicks and fetches password data
+- `findStayCodeAndAddButton()`: Locates the stay code and adds the Iot button
+- `addIotButton()`: Creates and inserts the Iot button
+- `handleIotClick()`: Handles button clicks and fetches password data
 
 ## Technical Implementation
 
