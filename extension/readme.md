@@ -1,6 +1,6 @@
 # Iot Integration Chrome Extension
 
-This Chrome extension adds Iot integration functionality to the calendar page. It automatically detects the stay code and adds a Iot button for quick address lookup.
+This Chrome extension adds Iot integration functionality to the calendar page. It automatically detects the stay code and adds a Iot button for Iot device generate password.
 
 ## Features
 
